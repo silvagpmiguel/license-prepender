@@ -1,0 +1,34 @@
+function getLicenseBoiler() {
+    sed -e "s/\[YEAR\]/$DATE/" -e "s/\[NAME\]/$AUTHOR/" "${BOILERPLATES[$LICENSE_NAME]}"
+}
+
+function addLicense() {
+    if [ "$LICENSE_NAME" = "mit" ]; then
+        sed -e "s/\[YEAR\]/$DATE/" -e "s/\[NAME\]/$AUTHOR/" "${LICENSES[$LICENSE_NAME]}" > "$REPO_PATH/LICENSE"
+    else
+        cat "${LICENSES[$LICENSE_NAME]}" > "$REPO_PATH/LICENSE"
+    fi
+}
+
+function prependAux() {
+    LICENSE=$(getLicenseBoiler)
+    NEWLICENSE="$2"
+    IFS=$'\n'; for line in ${LICENSE[@]}; do
+        NEWLICENSE="${NEWLICENSE}$4${line}\n"
+    done
+    NEWLICENSE="${NEWLICENSE}$3"
+    echo -e "$NEWLICENSE"
+}
+
+function prepend() {
+    addLicense
+    if [ "${BOILERPLATES[$LICENSE_NAME]}" != "" ]; then
+        local paths="$2"
+        IFS=$'\n'; for p in $paths; do
+            IFS=' '; for subp in $p; do
+                LICENSE=$(prependAux "${LICENSE_NAME}" "$3" "$4" "$5")
+                echo -e "$LICENSE\n\n\n$(cat $subp)" > "$subp"
+            done
+        done
+    fi
+}

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$#" != "4" ]; then
+    echo "Error. Usage: ./license-prepender <REPO_PATH> <LICENSE_NAME> <YEAR> <AUTHOR>"
+    exit
+fi
+
+. license_env
+. functions --source-only
+
+for key in "${!SUPPORTED[@]}"; do
+    FOUND_PATHS=$(find "$REPO_PATH" -type f -name "*$key")
+    case "${SUPPORTED[$key]}" in
+        "//")
+            prepend "$key" "${FOUND_PATHS[@]}" "" "" "// "
+        ;;
+        "/*")
+            prepend "$key" "${FOUND_PATHS[@]}" "/*\n" " */" " * "
+        ;;  
+        "<!--")
+            prepend "$key" "${FOUND_PATHS[@]}" "<!--\n" "-->" "~ "
+        ;;
+    esac
+done
