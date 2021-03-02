@@ -5,8 +5,8 @@ if [ "$#" != "4" ]; then
     exit
 fi
 
-. license_env
-. functions --source-only
+. src/license_env
+. src/functions --source-only
 
 for key in "${!SUPPORTED[@]}"; do
     FOUND_PATHS=$(find "$REPO_PATH" -type f -name "*$key")

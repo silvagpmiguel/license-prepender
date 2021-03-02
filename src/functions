@@ -10,6 +10,10 @@ function addLicense() {
     fi
 }
 
+function isBoilerplatePresent() {
+    grep -Fxq "$1" "$2"
+}
+
 function prependAux() {
     LICENSE=$(getLicenseBoiler)
     NEWLICENSE="$2"
@@ -27,7 +31,9 @@ function prepend() {
         IFS=$'\n'; for p in $paths; do
             IFS=' '; for subp in $p; do
                 LICENSE=$(prependAux "${LICENSE_NAME}" "$3" "$4" "$5")
-                echo -e "$LICENSE\n\n\n$(cat $subp)" > "$subp"
+                if ! $(isBoilerplatePresent "$LICENSE" "$subp"); then
+                    echo -e "$LICENSE\n\n\n$(cat $subp)" > "$subp"
+                fi
             done
         done
     fi
