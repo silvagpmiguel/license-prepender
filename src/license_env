@@ -2,8 +2,9 @@ REPO_PATH="$1"
 LICENSE_NAME=$( echo "$2" | tr '[:upper:]' '[:lower:]' )
 DATE="$3"
 AUTHOR="$4"
+DESCRIPTION="$5"
 
-declare -A SUPPORTED=( [".go"]="//" [".js"]="/*"  [".java"]="/*" [".kt"]="/*" [".rs"]="/*" [".ts"]="/*" [".xml"]="<!--" )
+declare -A SUPPORTED=( [".go"]="//" [".js"]="/*" [".java"]="/*" [".kt"]="/*" [".rs"]="/*" [".ts"]="/*" [".xml"]="<!--" )
 declare -A LICENSES
 declare -A BOILERPLATES
 

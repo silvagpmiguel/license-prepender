@@ -1,5 +1,14 @@
 function getLicenseBoiler() {
-    sed -e "s/\[YEAR\]/$DATE/" -e "s/\[NAME\]/$AUTHOR/" "${BOILERPLATES[$LICENSE_NAME]}"
+    if [[ "$DESCRIPTION" != "" ]]; then
+        sed -e "s/\[DESCRIPTION\]/$DESCRIPTION/" \
+            -e "s/\[YEAR\]/$DATE/" \
+            -e "s/\[NAME\]/$AUTHOR/" \
+            "${BOILERPLATES[$LICENSE_NAME]}" 
+    else
+        sed -e "s/\[YEAR\]/$DATE/" \
+        -e "s/\[NAME\]/$AUTHOR/" \
+        "${BOILERPLATES[$LICENSE_NAME]}"
+    fi
 }
 
 function addLicense() {
@@ -26,12 +35,13 @@ function prependAux() {
 
 function prepend() {
     addLicense
-    if [ "${BOILERPLATES[$LICENSE_NAME]}" != "" ]; then
+    if [[ "${BOILERPLATES[$LICENSE_NAME]}" != "" ]]; then
         local paths="$2"
         IFS=$'\n'; for p in $paths; do
             IFS=' '; for subp in $p; do
                 LICENSE=$(prependAux "${LICENSE_NAME}" "$3" "$4" "$5")
-                if ! $(isBoilerplatePresent "$LICENSE" "$subp"); then
+                AUX_LICENSE=$(getLicenseBoiler)
+                if ! $(isBoilerplatePresent "$AUX_LICENSE" "$subp"); then
                     echo -e "$LICENSE\n\n\n$(cat $subp)" > "$subp"
                 fi
             done
