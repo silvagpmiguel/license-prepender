@@ -1,21 +1,22 @@
-function getLicenseBoiler() {
+function getLicenseBoilerplate() {
+    local boilerplate=$(curl -s "${BOILERPLATES[$LICENSE_NAME]}")
     if [[ "$DESCRIPTION" != "" ]]; then
-        sed -e "s/\[DESCRIPTION\]/$DESCRIPTION/" \
+        BOILERPLATE_CONTENT=$(echo -e "${boilerplate}" | sed -e "s/\[DESCRIPTION\]/$DESCRIPTION/" \
             -e "s/\[YEAR\]/$DATE/" \
-            -e "s/\[NAME\]/$AUTHOR/" \
-            "${BOILERPLATES[$LICENSE_NAME]}" 
+            -e "s/\[NAME\]/$AUTHOR/")
     else
-        sed -e "s/\[YEAR\]/$DATE/" \
-        -e "s/\[NAME\]/$AUTHOR/" \
-        "${BOILERPLATES[$LICENSE_NAME]}"
+        BOILERPLATE_CONTENT=$(echo -e "${boilerplate}" | sed -e "s/\[YEAR\]/$DATE/" \
+            -e "s/\[NAME\]/$AUTHOR/")
     fi
 }
 
 function addLicense() {
-    if [ "$LICENSE_NAME" = "mit" ]; then
-        sed -e "s/\[YEAR\]/$DATE/" -e "s/\[NAME\]/$AUTHOR/" "${LICENSES[$LICENSE_NAME]}" > "$REPO_PATH/LICENSE"
+    LICENSE_CONTENT=$(curl -s "${LICENSES[$LICENSE_NAME]}")
+    if [[ "$LICENSE_NAME" == "mit" ]]; then
+        echo -e "$LICENSE_CONTENT" | sed -e "s/\[YEAR\]/$DATE/" \
+            -e "s/\[NAME\]/$AUTHOR/" > "$REPO_PATH/LICENSE"
     else
-        cat "${LICENSES[$LICENSE_NAME]}" > "$REPO_PATH/LICENSE"
+        echo -e "$LICENSE_CONTENT" > "$REPO_PATH/LICENSE"
     fi
 }
 
@@ -23,26 +24,23 @@ function isBoilerplatePresent() {
     grep -Fxq "$1" "$2"
 }
 
-function prependAux() {
-    LICENSE=$(getLicenseBoiler)
-    NEWLICENSE="$2"
-    IFS=$'\n'; for line in ${LICENSE[@]}; do
-        NEWLICENSE="${NEWLICENSE}$4${line}\n"
+function getCommentedBoilerplate() {
+    local license="$2"
+    IFS=$'\n'; for line in ${BOILERPLATE_CONTENT[@]}; do
+        license="${license}$4${line}\n"
     done
-    NEWLICENSE="${NEWLICENSE}$3"
-    echo -e "$NEWLICENSE"
+    license="${license}$3"
+    echo -e "$license"
 }
 
 function prepend() {
-    addLicense
-    if [[ "${BOILERPLATES[$LICENSE_NAME]}" != "" ]]; then
+    if $6; then
         local paths="$2"
         IFS=$'\n'; for p in $paths; do
             IFS=' '; for subp in $p; do
-                LICENSE=$(prependAux "${LICENSE_NAME}" "$3" "$4" "$5")
-                AUX_LICENSE=$(getLicenseBoiler)
-                if ! $(isBoilerplatePresent "$AUX_LICENSE" "$subp"); then
-                    echo -e "$LICENSE\n\n\n$(cat $subp)" > "$subp"
+                if ! $(isBoilerplatePresent "$BOILERPLATE_CONTENT" "$subp"); then
+                    local commented_boilerplate=$(getCommentedBoilerplate "${LICENSE_NAME}" "$3" "$4" "$5")
+                    echo -e "${commented_boilerplate}\n\n\n$(cat ${subp})" > "$subp"
                 fi
             done
         done

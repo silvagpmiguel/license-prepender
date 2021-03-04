@@ -7,20 +7,28 @@ if [[ $ARGC < 4 || $ARGC > 5 ]]; then
     exit
 fi
 
-. src/license_env
-. src/functions --source-only
+source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
+source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions) --source-only
+
+if [[ "${LICENSES[$LICENSE_NAME]}" != "" ]]; then
+    addLicense
+fi
+if [[ "${BOILERPLATES[$LICENSE_NAME]}" != "" ]]; then
+    getLicenseBoilerplate
+    HAS_BOILERPLATE=true
+fi
 
 for key in "${!SUPPORTED[@]}"; do
     FOUND_PATHS=$(find "$REPO_PATH" -type f -name "*$key")
     case "${SUPPORTED[$key]}" in
         "//")
-            prepend "$key" "${FOUND_PATHS[@]}" "" "" "// "
+            prepend "$key" "${FOUND_PATHS[@]}" "" "" "// " ${HAS_BOILERPLATE}
         ;;
         "/*")
-            prepend "$key" "${FOUND_PATHS[@]}" "/*\n" " */" " * "
+            prepend "$key" "${FOUND_PATHS[@]}" "/*\n" " */" " * " ${HAS_BOILERPLATE}
         ;;  
         "<!--")
-            prepend "$key" "${FOUND_PATHS[@]}" "<!--\n" "-->" "~ "
+            prepend "$key" "${FOUND_PATHS[@]}" "<!--\n" "-->" "~ " ${HAS_BOILERPLATE}
         ;;
     esac
 done
