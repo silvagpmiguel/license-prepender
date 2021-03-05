@@ -1,7 +1,8 @@
-REPO_PATH="$1"
-LICENSE_NAME=$( echo "$2" | tr '[:upper:]' '[:lower:]' )
+ARGC=$#
+LICENSE_NAME=$( echo "$1" | tr '[:upper:]' '[:lower:]' )
+AUTHOR="$2"
 DATE="$3"
-AUTHOR="$4"
+REPO_PATH="$4"
 DESCRIPTION="$5"
 LICENSE_URL="https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/licenses"
 BOILERPLATE_URL="https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/boilerplates"

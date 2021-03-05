@@ -1,13 +1,14 @@
 #!/bin/bash
 
-ARGC=$#
+source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
 
-if [[ $ARGC < 4 || $ARGC > 5 ]]; then
-    echo "Error. Usage: ./license-prepender <REPO_PATH> <LICENSE_NAME> <YEAR> <AUTHOR> [PROGRAM_DESCRIPTION]"
+if [[ $ARGC == 3 ]]; then
+    REPO_PATH="./"
+elif [[ $ARGC < 4 || $ARGC > 5 ]]; then
+    echo "Error. Usage: ./license-prepender <LICENSE_NAME> <AUTHOR> <YEAR> [REPO_PATH] [DESCRIPTION]"
     exit
 fi
 
-source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
 source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions) --source-only
 
 if [[ "${LICENSES[$LICENSE_NAME]}" != "" ]]; then
