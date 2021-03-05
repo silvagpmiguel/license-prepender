@@ -15,41 +15,49 @@ $licenses = @(
     name = 'apache2'
     alternate_names = @("apache")
     licensePathName = 'APACHE2'
+    hasBoilerplate = $true
 },
 @{
     name = 'boost1'
     alternate_names = @("boost1")
     licensePathName = 'BOOST1'
+    hasBoilerplate = $true
 },
 @{
     name = 'gnu_agpl3'
     alternate_names = @("agpl3")
     licensePathName = 'GNU_AGPLv3'
+    hasBoilerplate = $true
 },
 @{
     name = 'gnu_gpl3'
     alternate_names = @("gpl","gpl3")
     licensePathName = 'GNU_GPLv3'
+    hasBoilerplate = $true
 },
 @{
     name = 'gnu_lgpl3'
     alternate_names = @("lgpl3")
     licensePathName = 'GNU_LGPLv3'
+    hasBoilerplate = $true
 },
 @{
     name = 'mozilla'
     alternate_names = @("mozilla2")
     licensePathName = 'MOZILLA2'
+    hasBoilerplate = $true
 },
 @{
     name = 'unlicense'
     alternate_names = @()
     licensePathName = 'UNLICENSE'
+    hasBoilerplate = $false
 },
 @{
     name = 'mit'
     alternate_names = @()
     licensePathName = 'MIT'
+    hasBoilerplate = $false
 }
 )
 
@@ -97,7 +105,7 @@ function GetLicenseInfo {
     )
 
     ForEach ($licenseInfo in $licenses) {
-        if (($licenseInfo.name -eq $licenseName) -or ($_.alternate_names.Contains($licenseName))) {
+        if( ($licenseInfo.name -eq $licenseName) -or ($licenseInfo.alternate_names.Contains($licenseName)) ) {
             return $licenseInfo
         }
     }
@@ -145,46 +153,48 @@ function LicenseInFile {
 }
 
 $licenseInfo = GetLicenseInfo($licenseName)
-
-$BASE_URL = "https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/"
-$boilerplateRaw = (Invoke-WebRequest -Uri "$BASE_URL/boilerplates/$($licenseInfo.licensePathName)" -UseBasicParsing).Content
-
 $repoPathNormalized = $repoPath.TrimEnd(@('/', '\'))
 
-Get-ChildItem -Path $repoPathNormalized -Recurse | Foreach-Object {
+$BASE_URL = "https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/"
 
-    if ($fileexts.Contains($_.Extension)) {
-        $extObj = $fileexts[$_.Extension]
 
-        $bpLines = GetBoilerPlate $licenseInfo.licensePathName "$author" "$year" "$description" 
-        $prepend = @()
-        $i = 0
-        $bpLines | Foreach-Object {
-            if ($i -eq 0) {
-                if ($($extObj.first) -ne ""){
-                    $prepend += "$($extObj.first)"
+if($licenseInfo.hasBoilerplate) {
+    $boilerplateRaw = (Invoke-WebRequest -Uri "$BASE_URL/boilerplates/$($licenseInfo.licensePathName)" -UseBasicParsing).Content
+    Get-ChildItem -Path $repoPathNormalized -Recurse | Foreach-Object {
+
+        if ($fileexts.Contains($_.Extension)) {
+            $extObj = $fileexts[$_.Extension]
+    
+            $bpLines = GetBoilerPlate $licenseInfo.licensePathName "$author" "$year" "$description" 
+            $prepend = @()
+            $i = 0
+            $bpLines | Foreach-Object {
+                if ($i -eq 0) {
+                    if ($($extObj.first) -ne ""){
+                        $prepend += "$($extObj.first)"
+                    }
+                    $prepend += "$($extObj.middle)${_}"
+                } elseif ($i -eq ($bpLines.Length)-1) {
+                    $prepend += "$($extObj.middle)${_}"
+                    if ($($extObj.last) -ne ""){
+                        $prepend += "$($extObj.last)"
+                    }
+                } else {
+                    $prepend += "$($extObj.middle)${_}"
                 }
-                $prepend += "$($extObj.middle)${_}"
-            } elseif ($i -eq ($bpLines.Length)-1) {
-                $prepend += "$($extObj.middle)${_}"
-                if ($($extObj.last) -ne ""){
-                    $prepend += "$($extObj.last)"
-                }
-            } else {
-                $prepend += "$($extObj.middle)${_}"
+                $i++
             }
-            $i++
+            
+            $fileContents = Get-Content $_.FullName
+            if(LicenseInFile $_.FullName  $bpLines) {
+                Write-Host "License already present in $($_.FullName)";
+            } else {
+                Write-Host "Adding license to $($_.FullName)";
+                $prepend + "`r`n" +  $fileContents | Set-Content $_.FullName;
+            }
         }
-        
-        $fileContents = Get-Content $_.FullName
-        if(LicenseInFile $_.FullName  $bpLines) {
-            Write-Host "License already present in $($_.FullName)";
-        } else {
-            Write-Host "Adding license to $($_.FullName)";
-            $prepend + "`r`n" +  $fileContents | Set-Content $_.FullName;
-        }
+    
     }
-
 }
 
 if( !(Test-Path "$repoPathNormalized/LICENSE" -PathType Leaf) -and !(Test-Path "$repoPathNormalized/LICENSE.txt" -PathType Leaf) ) {
@@ -196,6 +206,7 @@ if( !(Test-Path "$repoPathNormalized/LICENSE" -PathType Leaf) -and !(Test-Path "
         $licenseRawLine = $licenseRawLine -replace "\[DESCRIPTION\]", "$description"
         $finalLicense += $licenseRawLine
     }
+    Write-Host "Creating license file at root of base path '$repoPathNormalized/LICENSE'";
 
     $finalLicense | Set-Content "$repoPathNormalized/LICENSE";
 }
