@@ -1,21 +1,6 @@
 #!/bin/bash
 
-#source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
-
-function usage() {
-echo "$1"
-cat << EOF
-Usage: license-prepender [flags]
--h     --help                       Show help
--l     --license       <STRING>     Add License name
--a     --author        <STRING>     Add Author name
--y     --year          <STRING>     Add Year
--p     --path          <STRING>     Add Repository path
--d     --description   <STRING>     Add Description
--dr    --dry-run                    Show files affected by boilerplate prepend and don't execute
-EOF
-exit
-}
+source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
 
 while :; do
     case $1 in
@@ -23,28 +8,28 @@ while :; do
             usage
         ;;
         -l|--license)
-            [[ "$2" != "" ]] && LICENSE_NAME=$( echo "$2" | tr '[:upper:]' '[:lower:]' );shift || usage "Something went wrong."
+            [[ "$2" != "" ]] && LICENSE_NAME=$( echo "$2" | tr '[:upper:]' '[:lower:]' );shift || usage "Wrong usage."
         ;;
         -a|--author)
-            [[ "$2" != "" ]] && AUTHOR="$2";shift || usage "Something went wrong."
+            [[ "$2" != "" ]] && AUTHOR="$2";shift || usage "Wrong usage."
         ;;
         -y|--year)
-            [[ "$2" != "" ]] && DATE="$2";shift || usage "Something went wrong."
+            [[ "$2" != "" ]] && DATE="$2";shift || usage "Wrong usage."
         ;;
         -p|--path)
-            [[ "$2" != "" ]] && REPO_PATH="$2";shift || usage "Something went wrong."
+            [[ "$2" != "" ]] && REPO_PATH="$2";shift || usage "Wrong usage."
         ;;
         -d|--description)
-            [[ "$2" != "" ]] && DESCRIPTION="$2";shift || usage "Something went wrong."
+            [[ "$2" != "" ]] && DESCRIPTION="$2";shift || usage "Wrong usage."
         ;;
         -dr|--dry-run)
             DRY_RUN=true
         ;;
         "")
-            break
+            [[ ${LICENSE_NAME} == "" ]] && usage "Wrong usage." || break
         ;;
         *)
-            usage "Something went wrong."
+            usage "Wrong usage."
         ;;
     esac
     shift
@@ -52,16 +37,20 @@ done
 
 source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions) --source-only
 
+if ${DRY_RUN}; then
+    echo "This is a dry run, changes will not be made"
+fi
+
 if [[ "${LICENSES[$LICENSE_NAME]}" != "" ]]; then
-    echo "Add license file in $REPO_PATH/LICENSE"
-    if !DRY_RUN; then
+    echo "Add license file in ${REPO_PATH}/LICENSE"
+    if ! ${DRY_RUN}; then
         addLicense
     fi
 fi
+
 if [[ "${BOILERPLATES[$LICENSE_NAME]}" != "" ]]; then
     HAS_BOILERPLATE=true
     getLicenseBoilerplate
-
 fi
 
 for key in "${!SUPPORTED[@]}"; do
