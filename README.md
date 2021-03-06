@@ -2,12 +2,30 @@
 
 A program that handles the license burocracy with a simple command. This program prepends a license boilerplate into all of your repository files and generates a `LICENSE` file at the repository root path. It prepends all files that match the extensions supported in [Supported Extensions](#supported-extensions) and will only work with licenses provided in [Supported Licenses](#supported-licenses).
 
+*Note: Files that already had a boilerplate will not be updated.*
+
 ## Installation
 Download `license-prepender` or `license-prepender.ps1` if you are on **Linux** or on **Windows**, respectively.
 ## Usage (Linux)
-`./license-prepender <LICENSE_NAME> <AUTHOR> <YEAR> [REPO_PATH] [DESCRIPTION]`
+```
+Usage: license-prepender [flags]
+-h     --help                       Show help
+-l     --license       <STRING>     Choose a license
+-a     --author        <STRING>     Set Author name
+-y     --year          <STRING>     Set Year
+-p     --path          <STRING>     Set Repository path (default: './')
+-d     --description   <STRING>     Set Description
+-dr    --dry-run                    Show files affected by boilerplate prepend and don't execute
+```
 ## Usage (Windows)
-`.\license-prepender.ps1 <licenseName> <author> <year> [repoPath="."] [description=""]`
+```
+Usage: license-prepender.ps1 [flags]
+-licenseName   <STRING>     Choose a license
+-author        <STRING>     Set Author name
+-year          <STRING>     Set Year
+-repoPath      <STRING>     Set Repository path (default: './')
+-description   <STRING>     Set Description
+```
 
 ## Supported Extensions
 - **Go** (.go)

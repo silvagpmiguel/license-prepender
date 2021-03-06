@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
-source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions) --source-only
+source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions)
 
 while :; do
     case $1 in
@@ -9,33 +9,32 @@ while :; do
             usage
         ;;
         -l|--license)
-            [[ "$2" != "" ]] && LICENSE_NAME=$( echo "$2" | tr '[:upper:]' '[:lower:]' );shift || usage "Wrong usage."
+            [[ "$2" != "" ]] && LICENSE_NAME=$( echo "$2" | tr '[:upper:]' '[:lower:]' );shift || usage "Wrong usage.\n"
         ;;
         -a|--author)
-            [[ "$2" != "" ]] && AUTHOR="$2";shift || usage "Wrong usage."
+            [[ "$2" != "" ]] && AUTHOR="$2";shift || usage "Wrong usage.\n"
         ;;
         -y|--year)
-            [[ "$2" != "" ]] && DATE="$2";shift || usage "Wrong usage."
+            [[ "$2" != "" ]] && DATE="$2";shift || usage "Wrong usage.\n"
         ;;
         -p|--path)
-            [[ "$2" != "" ]] && REPO_PATH="$2";shift || usage "Wrong usage."
+            [[ "$2" != "" ]] && REPO_PATH="$2";shift || usage "Wrong usage.\n"
         ;;
         -d|--description)
-            [[ "$2" != "" ]] && DESCRIPTION="$2";shift || usage "Wrong usage."
+            [[ "$2" != "" ]] && DESCRIPTION="$2";shift || usage "Wrong usage.\n"
         ;;
         -dr|--dry-run)
             DRY_RUN=true
         ;;
         "")
-            [[ ${LICENSE_NAME} == "" ]] && usage "Wrong usage." || break
+            [[ ${LICENSE_NAME} == "" ]] && usage "Wrong usage.\n" || break
         ;;
         *)
-            usage "Wrong usage."
+            usage "Wrong usage.\n"
         ;;
     esac
     shift
 done
-
 
 if ${DRY_RUN}; then
     echo "This is a dry run, changes will not be made"

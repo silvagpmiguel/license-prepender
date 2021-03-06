@@ -1,14 +1,16 @@
+#!/usr/bin/env bash
+
 function usage() {
-echo "$1"
+printf "$1"
 cat << EOF
 Usage: license-prepender [flags]
--h     --help                       Show help
--l     --license       <STRING>     Choose a license
--a     --author        <STRING>     Set Author name
--y     --year          <STRING>     Set Year
--p     --path          <STRING>     Set Repository path (default: './')
--d     --description   <STRING>     Set Description
--dr    --dry-run                    Show files affected by boilerplate prepend and don't execute
+-h      --help                       Show help
+-l      --license       <STRING>     Choose a license
+-a      --author        <STRING>     Set Author name
+-y      --year          <STRING>     Set Year
+-p      --path          <STRING>     Set Repository path (default: './')
+-d      --description   <STRING>     Set Description
+-dr     --dry-run                    Show files affected by boilerplate prepend and don't execute
 EOF
 exit
 }
@@ -40,7 +42,6 @@ function isBoilerplatePresent() {
 }
 
 function getCommentedBoilerplate() {
-
     local license="$2"
     while read line; do
         license="${license}$4${line}\n"
