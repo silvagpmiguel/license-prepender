@@ -1,3 +1,16 @@
+function usage() {
+cat << EOF
+$1Usage: license-prepender <command> [flags]
+-h, --help\tShow help
+-l, --license \tAdd License name
+-a, --author string\tAdd Author name
+-y, --year string\tAdd Year
+-p, --path string\tAdd Repository path
+-d, --description\tAdd Description
+-dr, --dry-run\tShow files affected by boilerplate prepend and don't execute
+EOF  
+}
+
 function getLicenseBoilerplate() {
     local boilerplate=$(curl -s "${BOILERPLATES[$LICENSE_NAME]}")
     if [[ "$DESCRIPTION" != "" ]]; then
@@ -39,8 +52,11 @@ function prepend() {
         IFS=$'\n'; for p in $paths; do
             IFS=' '; for subp in $p; do
                 if ! $(isBoilerplatePresent "$BOILERPLATE_CONTENT" "$subp"); then
-                    local commented_boilerplate=$(getCommentedBoilerplate "${LICENSE_NAME}" "$3" "$4" "$5")
-                    echo -e "${commented_boilerplate}\n\n\n$(cat ${subp})" > "$subp"
+                    echo "Boilerplate prepended in $subp"
+                    if !DRY_RUN; then
+                        local commented_boilerplate=$(getCommentedBoilerplate "${LICENSE_NAME}" "$3" "$4" "$5")
+                        echo -e "${commented_boilerplate}\n\n\n$(cat ${subp})" > "$subp"
+                    fi
                 fi
             done
         done

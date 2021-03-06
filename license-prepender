@@ -1,22 +1,67 @@
 #!/bin/bash
 
-source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
+#source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
 
-if [[ $ARGC == 3 ]]; then
-    REPO_PATH="./"
-elif [[ $ARGC < 4 || $ARGC > 5 ]]; then
-    echo "Error. Usage: ./license-prepender <LICENSE_NAME> <AUTHOR> <YEAR> [REPO_PATH] [DESCRIPTION]"
-    exit
-fi
+function usage() {
+echo "$1"
+cat << EOF
+Usage: license-prepender [flags]
+-h     --help                       Show help
+-l     --license       <STRING>     Add License name
+-a     --author        <STRING>     Add Author name
+-y     --year          <STRING>     Add Year
+-p     --path          <STRING>     Add Repository path
+-d     --description   <STRING>     Add Description
+-dr    --dry-run                    Show files affected by boilerplate prepend and don't execute
+EOF
+exit
+}
+
+while :; do
+    case $1 in
+        -h|--help)
+            usage
+        ;;
+        -l|--license)
+            [[ "$2" != "" ]] && LICENSE_NAME=$( echo "$2" | tr '[:upper:]' '[:lower:]' );shift || usage "Something went wrong."
+        ;;
+        -a|--author)
+            [[ "$2" != "" ]] && AUTHOR="$2";shift || usage "Something went wrong."
+        ;;
+        -y|--year)
+            [[ "$2" != "" ]] && DATE="$2";shift || usage "Something went wrong."
+        ;;
+        -p|--path)
+            [[ "$2" != "" ]] && REPO_PATH="$2";shift || usage "Something went wrong."
+        ;;
+        -d|--description)
+            [[ "$2" != "" ]] && DESCRIPTION="$2";shift || usage "Something went wrong."
+        ;;
+        -dr|--dry-run)
+            DRY_RUN=true
+        ;;
+        "")
+            break
+        ;;
+        *)
+            usage "Something went wrong."
+        ;;
+    esac
+    shift
+done
 
 source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions) --source-only
 
 if [[ "${LICENSES[$LICENSE_NAME]}" != "" ]]; then
-    addLicense
+    echo "Add license file in $REPO_PATH/LICENSE"
+    if !DRY_RUN; then
+        addLicense
+    fi
 fi
 if [[ "${BOILERPLATES[$LICENSE_NAME]}" != "" ]]; then
-    getLicenseBoilerplate
     HAS_BOILERPLATE=true
+    getLicenseBoilerplate
+
 fi
 
 for key in "${!SUPPORTED[@]}"; do

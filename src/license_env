@@ -1,9 +1,10 @@
 ARGC=$#
-LICENSE_NAME=$( echo "$1" | tr '[:upper:]' '[:lower:]' )
-AUTHOR="$2"
-DATE="$3"
-REPO_PATH="$4"
-DESCRIPTION="$5"
+LICENSE_NAME=""
+AUTHOR=""
+DATE=""
+REPO_PATH="."
+DESCRIPTION=""
+DRY_RUN=false
 LICENSE_URL="https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/licenses"
 BOILERPLATE_URL="https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/boilerplates"
 LICENSE_CONTENT=""
