@@ -3,11 +3,11 @@ echo "$1"
 cat << EOF
 Usage: license-prepender [flags]
 -h     --help                       Show help
--l     --license       <STRING>     Add License name
--a     --author        <STRING>     Add Author name
--y     --year          <STRING>     Add Year
--p     --path          <STRING>     Add Repository path
--d     --description   <STRING>     Add Description
+-l     --license       <STRING>     Choose a license
+-a     --author        <STRING>     Set Author name
+-y     --year          <STRING>     Set Year
+-p     --path          <STRING>     Set Repository path (default: './')
+-d     --description   <STRING>     Set Description
 -dr    --dry-run                    Show files affected by boilerplate prepend and don't execute
 EOF
 exit
@@ -36,14 +36,15 @@ function addLicense() {
 }
 
 function isBoilerplatePresent() {
-    grep -Fo "$1" "$2" | wc -l
+    [[ $(grep -Fo "$1" "$2" | wc -l) != "0" ]]
 }
 
 function getCommentedBoilerplate() {
+
     local license="$2"
-    IFS=$'\n'; for line in ${BOILERPLATE_CONTENT[@]}; do
+    while read line; do
         license="${license}$4${line}\n"
-    done
+    done <<< ${BOILERPLATE_CONTENT[@]}
     license="${license}$3"
     echo -e "${license}"
 }
@@ -53,7 +54,7 @@ function prepend() {
         local paths="$2"
         IFS=$'\n'; for p in $paths; do
             IFS=' '; for subp in $p; do
-                if [[ $(isBoilerplatePresent "${BOILERPLATE_CONTENT}" "${subp}") == "0" ]]; then
+                if ! isBoilerplatePresent "${BOILERPLATE_CONTENT}" "${subp}"; then
                     echo "Boilerplate prepended in ${subp}"
                     if ! ${DRY_RUN}; then
                         local commented_boilerplate=$(getCommentedBoilerplate "${LICENSE_NAME}" "$3" "$4" "$5")

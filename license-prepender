@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/license_env)
+source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions) --source-only
 
 while :; do
     case $1 in
@@ -35,14 +36,13 @@ while :; do
     shift
 done
 
-source <(curl -s https://raw.githubusercontent.com/silvagpmiguel/license-prepender/main/src/functions) --source-only
 
 if ${DRY_RUN}; then
     echo "This is a dry run, changes will not be made"
 fi
 
 if [[ "${LICENSES[$LICENSE_NAME]}" != "" ]]; then
-    echo "Add license file in ${REPO_PATH}/LICENSE"
+    echo "Add license file in ${REPO_PATH}LICENSE"
     if ! ${DRY_RUN}; then
         addLicense
     fi
